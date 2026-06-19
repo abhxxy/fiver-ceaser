@@ -1,0 +1,24 @@
+{
+  "name": "fiver-ceaser",
+  "version": "1.0.0",
+  "description": "WhatsApp group link guard bot: deletes links and removes senders.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "list-groups": "node list-groups.js",
+    "check": "node --check index.js && node --check list-groups.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "whatsapp-web.js",
+    "moderation",
+    "bot"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.7"
+  }
+}
