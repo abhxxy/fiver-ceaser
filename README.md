@@ -43,7 +43,13 @@ After scanning QR / authenticating, it prints all groups the bot account can see
 npm start
 ```
 
-For production, run it under pm2/systemd/Docker so it stays online.
+The bot also starts a small status page on `PORT`/3000:
+
+- `/` — scan-friendly WhatsApp QR page
+- `/health` — JSON health/status
+- `/qr` — current QR data URL, if login is pending
+
+For production, run it under pm2/systemd/Docker/Coolify so it stays online.
 
 ## Important notes
 
