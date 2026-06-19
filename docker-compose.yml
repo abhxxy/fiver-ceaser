@@ -12,8 +12,8 @@ services:
       DRY_RUN: ${DRY_RUN:-false}
       PORT: ${PORT:-3000}
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - fiver_ceaser_auth:/app/.wwebjs_auth
       - fiver_ceaser_cache:/app/.wwebjs_cache
