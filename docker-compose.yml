@@ -15,9 +15,9 @@ services:
     expose:
       - "3000"
     volumes:
-      - fiver_ceaser_auth:/app/.wwebjs_auth
-      - fiver_ceaser_cache:/app/.wwebjs_cache
+      - fiver_ceaser_auth_v2:/app/.wwebjs_auth
+      - fiver_ceaser_cache_v2:/app/.wwebjs_cache
 
 volumes:
-  fiver_ceaser_auth:
-  fiver_ceaser_cache:
+  fiver_ceaser_auth_v2:
+  fiver_ceaser_cache_v2:

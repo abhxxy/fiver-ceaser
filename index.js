@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const qrImage = require('qrcode');
 const qrcode = require('qrcode-terminal');
@@ -16,6 +18,29 @@ let botStatus = 'starting';
 
 // Matches common URLs, bare domains, and WhatsApp invite links.
 const LINK_REGEX = /((https?:\/\/|www\.)\S+|\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?|chat\.whatsapp\.com\/\S+)/i;
+
+function cleanupChromiumProfileLocks() {
+  const authRoot = path.join(process.cwd(), '.wwebjs_auth');
+  const lockNames = new Set(['SingletonCookie', 'SingletonLock', 'SingletonSocket']);
+
+  if (!fs.existsSync(authRoot)) return;
+
+  const stack = [authRoot];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (lockNames.has(entry.name)) {
+        fs.rmSync(fullPath, { force: true });
+        console.log(`Removed stale Chromium profile lock: ${fullPath}`);
+      }
+    }
+  }
+}
+
+cleanupChromiumProfileLocks();
 
 const app = express();
 
