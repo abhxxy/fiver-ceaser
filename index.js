@@ -141,6 +141,15 @@ async function isTargetGroup(chat) {
   return true;
 }
 
+function getParticipantId(participant) {
+  return participant && participant.id && (participant.id._serialized || participant.id.user || participant.id);
+}
+
+function isParticipantAdmin(chat, participantId) {
+  const participant = (chat.participants || []).find((item) => getParticipantId(item) === participantId);
+  return Boolean(participant && (participant.isAdmin || participant.isSuperAdmin));
+}
+
 async function removeParticipant(chat, participantId) {
   if (DRY_RUN) {
     console.log(`[dry-run] Would remove ${participantId} from ${chat.name}`);
@@ -165,6 +174,11 @@ client.on('message', async (message) => {
     const participantId = message.author || message.from;
     if (!participantId) {
       console.warn('Could not resolve participant for message', message.id && message.id._serialized);
+      return;
+    }
+
+    if (isParticipantAdmin(chat, participantId)) {
+      console.log(`Link detected from admin ${participantId} in "${chat.name}"; ignoring admin message.`);
       return;
     }
 
