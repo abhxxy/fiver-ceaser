@@ -9,6 +9,12 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const TARGET_GROUP_ID = process.env.TARGET_GROUP_ID || '';
 const TARGET_GROUP_NAME = process.env.TARGET_GROUP_NAME || '';
+const IGNORED_PARTICIPANT_IDS = new Set(
+  (process.env.IGNORED_PARTICIPANT_IDS || '58090154115181@lid')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean)
+);
 const DRY_RUN = String(process.env.DRY_RUN || 'false').toLowerCase() === 'true';
 const PORT = Number(process.env.PORT || 3000);
 
@@ -67,6 +73,7 @@ app.get('/', (_req, res) => {
       <p>Status: <strong class="${botStatus === 'ready' ? 'ok' : 'warn'}">${botStatus}</strong></p>
       ${latestQrDataUrl ? `<p>Scan this QR in WhatsApp → Linked devices:</p><img src="${latestQrDataUrl}" alt="WhatsApp login QR" />` : '<p>No QR available right now. If status is ready, WhatsApp is already linked.</p>'}
       <p>Target: <code>${TARGET_GROUP_ID || TARGET_GROUP_NAME || 'all groups'}</code></p>
+      <p>Ignored IDs: <code>${Array.from(IGNORED_PARTICIPANT_IDS).join(', ') || 'none'}</code></p>
       <p>Dry run: <code>${DRY_RUN}</code></p>
     </main>
   </body>
@@ -169,13 +176,19 @@ client.on('message', async (message) => {
   try {
     const chat = await message.getChat();
     if (!(await isTargetGroup(chat))) return;
-    if (!hasLink(message.body)) return;
 
     const participantId = message.author || message.from;
     if (!participantId) {
       console.warn('Could not resolve participant for message', message.id && message.id._serialized);
       return;
     }
+
+    if (IGNORED_PARTICIPANT_IDS.has(participantId)) {
+      console.log(`Ignoring message from exempt participant ${participantId}.`);
+      return;
+    }
+
+    if (!hasLink(message.body)) return;
 
     if (isParticipantAdmin(chat, participantId)) {
       console.log(`Link detected from admin ${participantId} in "${chat.name}"; ignoring admin message.`);
