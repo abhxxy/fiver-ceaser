@@ -53,8 +53,8 @@ For production, run it under pm2/systemd/Docker/Coolify so it stays online.
 
 ## Important notes
 
-- Admins are ignored when WhatsApp metadata can verify the sender as admin/superadmin.
 - IDs in `IGNORED_PARTICIPANT_IDS` are fully ignored. Default: `58090154115181@lid,237804470702200@lid`.
+- The bot does not check admin metadata; any non-ignored participant who sends a link is enforced against.
 - Deleting for everyone can fail if WhatsApp does not allow the bot to delete that message; the code logs the error.
 - Participant removal requires the bot account to be group admin.
 - This uses WhatsApp Web automation, not the official WhatsApp Business Cloud API.

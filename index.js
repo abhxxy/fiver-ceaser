@@ -148,34 +148,6 @@ async function isTargetGroup(chat) {
   return true;
 }
 
-function getParticipantId(participant) {
-  return participant && participant.id && (participant.id._serialized || participant.id.user || participant.id);
-}
-
-function normalizeParticipantId(id) {
-  return String(id || '')
-    .trim()
-    .replace(/@c\.us$/i, '')
-    .replace(/@s\.whatsapp\.net$/i, '')
-    .replace(/@lid$/i, '');
-}
-
-function findParticipant(chat, participantId) {
-  const exactMatch = (chat.participants || []).find((item) => getParticipantId(item) === participantId);
-  if (exactMatch) return exactMatch;
-
-  const normalizedSender = normalizeParticipantId(participantId);
-  if (!normalizedSender) return null;
-
-  return (chat.participants || []).find((item) => normalizeParticipantId(getParticipantId(item)) === normalizedSender) || null;
-}
-
-function getParticipantAdminStatus(chat, participantId) {
-  const participant = findParticipant(chat, participantId);
-  if (!participant) return null;
-  return Boolean(participant.isAdmin || participant.isSuperAdmin);
-}
-
 async function removeParticipant(chat, participantId) {
   if (DRY_RUN) {
     console.log(`[dry-run] Would remove ${participantId} from ${chat.name}`);
@@ -208,16 +180,6 @@ client.on('message', async (message) => {
     }
 
     if (!hasLink(message.body)) return;
-
-    const adminStatus = getParticipantAdminStatus(chat, participantId);
-    if (adminStatus) {
-      console.log(`Link detected from admin ${participantId} in "${chat.name}"; ignoring admin message.`);
-      return;
-    }
-
-    if (adminStatus === null) {
-      console.log(`Link detected from ${participantId} in "${chat.name}"; participant metadata could not be verified, continuing with normal enforcement.`);
-    }
 
     console.log(`Link detected in "${chat.name}" from ${participantId}: ${message.body}`);
 
