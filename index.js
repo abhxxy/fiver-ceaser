@@ -10,7 +10,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const TARGET_GROUP_ID = process.env.TARGET_GROUP_ID || '';
 const TARGET_GROUP_NAME = process.env.TARGET_GROUP_NAME || '';
 const IGNORED_PARTICIPANT_IDS = new Set(
-  (process.env.IGNORED_PARTICIPANT_IDS || '58090154115181@lid')
+  (process.env.IGNORED_PARTICIPANT_IDS || '58090154115181@lid,237804470702200@lid')
     .split(',')
     .map((id) => id.trim())
     .filter(Boolean)
@@ -210,14 +210,13 @@ client.on('message', async (message) => {
     if (!hasLink(message.body)) return;
 
     const adminStatus = getParticipantAdminStatus(chat, participantId);
-    if (adminStatus === null) {
-      console.log(`Link detected from ${participantId} in "${chat.name}", but participant metadata could not be verified; ignoring to avoid accidental removal.`);
-      return;
-    }
-
     if (adminStatus) {
       console.log(`Link detected from admin ${participantId} in "${chat.name}"; ignoring admin message.`);
       return;
+    }
+
+    if (adminStatus === null) {
+      console.log(`Link detected from ${participantId} in "${chat.name}"; participant metadata could not be verified, continuing with normal enforcement.`);
     }
 
     console.log(`Link detected in "${chat.name}" from ${participantId}: ${message.body}`);
