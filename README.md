@@ -54,6 +54,7 @@ For production, run it under pm2/systemd/Docker/Coolify so it stays online.
 ## Important notes
 
 - Admins are ignored: if an admin sends a link, the bot logs it and takes no delete/kick action.
+- Safe fail-closed behavior: if WhatsApp returns an unusual sender ID and the bot cannot verify that participant in group metadata, it ignores the message instead of risking a wrong kick.
 - IDs in `IGNORED_PARTICIPANT_IDS` are fully ignored. Default: `58090154115181@lid`.
 - Deleting for everyone can fail if WhatsApp does not allow the bot to delete that message; the code logs the error.
 - Participant removal requires the bot account to be group admin.
