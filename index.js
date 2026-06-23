@@ -10,7 +10,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const TARGET_GROUP_ID = process.env.TARGET_GROUP_ID || '';
 const TARGET_GROUP_NAME = process.env.TARGET_GROUP_NAME || '';
 const IGNORED_PARTICIPANT_IDS = new Set(
-  (process.env.IGNORED_PARTICIPANT_IDS || '58090154115181@lid,237804470702200@lid')
+  (process.env.IGNORED_PARTICIPANT_IDS || '58090154115181@lid,237804470702200@lid,162518056071398@lid')
     .split(',')
     .map((id) => id.trim())
     .filter(Boolean)
