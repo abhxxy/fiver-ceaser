@@ -40,7 +40,6 @@ function cleanupChromiumProfileLocks() {
         stack.push(fullPath);
       } else if (lockNames.has(entry.name)) {
         fs.rmSync(fullPath, { force: true });
-        console.log(`Removed stale Chromium profile lock: ${fullPath}`);
       }
     }
   }
@@ -86,7 +85,7 @@ app.get('/qr', (_req, res) => {
   return res.json({ qr: latestQr, dataUrl: latestQrDataUrl, status: botStatus });
 });
 
-app.listen(PORT, () => console.log(`Status/QR page listening on port ${PORT}`));
+app.listen(PORT);
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: process.env.SESSION_NAME || 'fiver-ceaser' }),
@@ -109,7 +108,6 @@ client.on('qr', async (qr) => {
   botStatus = 'waiting_for_qr_scan';
   latestQr = qr;
   latestQrDataUrl = await qrImage.toDataURL(qr, { margin: 1, width: 512 });
-  console.log('Scan this QR code with WhatsApp > Linked devices:');
   qrcode.generate(qr, { small: true });
 });
 
@@ -117,14 +115,12 @@ client.on('authenticated', () => {
   botStatus = 'authenticated';
   latestQr = null;
   latestQrDataUrl = null;
-  console.log('Authenticated.');
 });
 
 client.on('ready', () => {
   botStatus = 'ready';
   latestQr = null;
   latestQrDataUrl = null;
-  console.log('Fiver Ceaser link guard is ready.');
 });
 
 client.on('auth_failure', (message) => {
@@ -149,10 +145,7 @@ async function isTargetGroup(chat) {
 }
 
 async function removeParticipant(chat, participantId) {
-  if (DRY_RUN) {
-    console.log(`[dry-run] Would remove ${participantId} from ${chat.name}`);
-    return;
-  }
+  if (DRY_RUN) return;
 
   if (typeof chat.removeParticipants === 'function') {
     await chat.removeParticipants([participantId]);
@@ -169,29 +162,17 @@ client.on('message', async (message) => {
     if (!(await isTargetGroup(chat))) return;
 
     const participantId = message.author || message.from;
-    if (!participantId) {
-      console.warn('Could not resolve participant for message', message.id && message.id._serialized);
-      return;
-    }
+    console.log(`${participantId}: ${message.body}`);
 
-    if (IGNORED_PARTICIPANT_IDS.has(participantId)) {
-      console.log(`Ignoring message from exempt participant ${participantId}.`);
-      return;
-    }
-
+    if (!participantId) return;
+    if (IGNORED_PARTICIPANT_IDS.has(participantId)) return;
     if (!hasLink(message.body)) return;
 
-    console.log(`Link detected in "${chat.name}" from ${participantId}: ${message.body}`);
-
     if (!DRY_RUN) {
-      await message.delete(true); // true = delete for everyone; bot must have permission/admin where required.
-      console.log('Deleted message for everyone.');
-    } else {
-      console.log('[dry-run] Would delete message for everyone.');
+      await message.delete(true);
     }
 
     await removeParticipant(chat, participantId);
-    console.log(`Removed participant ${participantId}.`);
   } catch (error) {
     console.error('Failed to enforce link rule:', error && error.stack ? error.stack : error);
   }
